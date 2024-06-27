@@ -43,7 +43,7 @@ resource "aws_instance" "k6_instance" {
   ami           = var.ami_id
   instance_type = var.instance_type
   subnet_id     = element(aws_subnet.main.*.id, count.index)
-  security_groups = [aws_security_group.instance.name]
+  security_groups = [aws_security_group.instance.id]  # Use security group ID
 
   tags = {
     Name = "k6-instance-${count.index}"
@@ -60,13 +60,8 @@ resource "aws_instance" "k6_instance" {
               sudo apt update
               sudo apt install k6 -y
               EOF
-
-  provisioner "local-exec" {
-    command = "echo ${aws_instance.k6_instance[count.index].public_ip} >> inventory"
-  }
 }
 
-output "instance_ips" {
+output "k6_instance_ips" {
   value = aws_instance.k6_instance.*.public_ip
 }
-
