@@ -5,7 +5,7 @@ variable "aws_region" {
 
 variable "availability_zones" {
   description = "List of availability zones to use for the subnets."
-  default     = ["us-east-1a", "us-east-1b", "us-east-1c"]
+  default     = ["eu-north-1a", "eu-north-1b", "eu-north-1c"]
 }
 
 variable "ami_id" {
