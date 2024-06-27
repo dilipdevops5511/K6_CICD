@@ -61,7 +61,3 @@ resource "aws_instance" "k6_instance" {
               sudo apt install k6 -y
               EOF
 }
-
-output "k6_instance_ips" {
-  value = aws_instance.k6_instance.*.public_ip
-}
