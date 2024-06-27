@@ -1,0 +1,62 @@
+---
+- name: Install k6 and run tests
+  hosts: k6_instances
+  become: yes
+  tasks:
+    - name: Update and install dependencies
+      yum:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - docker
+        - curl
+
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Add k6 repository and install k6
+      shell: |
+        curl -s https://dl.k6.io/key.gpg | sudo apt-key add -
+        echo "deb https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+        sudo apt update
+        sudo apt install k6 -y
+
+    - name: Copy k6 test script to instance
+      copy:
+        src: /path/to/your-test-script.js
+        dest: /home/ec2-user/your-test-script.js
+
+    - name: Copy split CSV data to instance (part 1)
+      copy:
+        src: /path/to/split_data/data_part1.csv
+        dest: /home/ec2-user/combined.csv
+      when: "'part1' in group_names"  # Replace 'part1' with appropriate group name
+
+    - name: Copy split CSV data to instance (part 2)
+      copy:
+        src: /path/to/split_data/data_part2.csv
+        dest: /home/ec2-user/combined.csv
+      when: "'part2' in group_names"  # Replace 'part2' with appropriate group name
+
+    - name: Copy split CSV data to instance (part 3)
+      copy:
+        src: /path/to/split_data/data_part3.csv
+        dest: /home/ec2-user/combined.csv
+      when: "'part3' in group_names"  # Replace 'part3' with appropriate group name
+
+    - name: Run k6 test and save output to JSON file
+      shell: k6 run /home/ec2-user/your-test-script.js --out json=/home/ec2-user/k6_report.json
+      register: k6_output
+
+    - name: Display k6 output
+      debug:
+        var: k6_output.stdout
+
+    - name: Fetch k6 report JSON file
+      fetch:
+        src: /home/ec2-user/k6_report.json
+        dest: /path/to/local/reports/{{ inventory_hostname }}_k6_report.json
+        flat: yes
