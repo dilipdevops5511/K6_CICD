@@ -33,19 +33,19 @@
       copy:
         src: /path/to/split_data/data_part1.csv
         dest: /home/ubuntu/combined.csv
-      when: "'part1' in group_names"  # Replace 'part1' with appropriate group name
+      when: "'part1' in servers"  # Replace 'part1' with appropriate group name
 
     - name: Copy split CSV data to instance (part 2)
       copy:
         src: /path/to/split_data/data_part2.csv
         dest: /home/ubuntu/combined.csv
-      when: "'part2' in group_names"  # Replace 'part2' with appropriate group name
+      when: "'part2' in servers"  # Replace 'part2' with appropriate group name
 
     - name: Copy split CSV data to instance (part 3)
       copy:
         src: /path/to/split_data/data_part3.csv
         dest: /home/ubuntu/combined.csv
-      when: "'part3' in group_names"  # Replace 'part3' with appropriate group name
+      when: "'part3' in servers"  # Replace 'part3' with appropriate group name
 
     - name: Run k6 test and save output to JSON file
       shell: k6 run /home/ubuntu/your-test-script.js --out json=/home/ubuntu/k6_report.json
