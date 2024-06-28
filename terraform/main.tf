@@ -39,12 +39,12 @@ resource "aws_security_group" "instance" {
 }
 
 resource "aws_instance" "k6_instance" {
-  count         = 3
-  ami           = var.ami_id
-  instance_type = var.instance_type
-  subnet_id     = element(aws_subnet.main.*.id, count.index)
-  security_groups = [aws_security_group.instance.id]  # Use security group ID
-
+  count           = 3
+  ami             = var.ami_id
+  instance_type   = var.instance_type
+  subnet_id       = element(aws_subnet.main.*.id, count.index)
+  security_groups = [aws_security_group.instance.id]
+  key_name        = "techkeyjune"  
   tags = {
     Name = "k6-instance-${count.index}"
   }
