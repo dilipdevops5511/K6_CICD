@@ -69,6 +69,26 @@ resource "aws_security_group" "instance_sg" {
   }
 }
 
+// Create a public route table
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.main.id  // Replace with your internet gateway ID if applicable
+  }
+
+  tags = {
+    Name = "public-route-table"
+  }
+}
+
+// Associate the public route table with the public subnet
+resource "aws_route_table_association" "public_subnet_association" {
+  subnet_id      = aws_subnet.public.id
+  route_table_id = aws_route_table.public.id
+}
+
 // Generate a file containing only the public IP addresses of the instances
 resource "local_file" "instance_ips" {
   content  = join("\n", aws_instance.k6_instance[*].public_ip)
