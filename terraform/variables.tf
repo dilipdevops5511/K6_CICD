@@ -10,7 +10,7 @@ variable "availability_zones" {
 
 variable "ami_id" {
   description = "The AMI ID to use for the yesEC2 instances."
-  default     = "ami-011e54f70c1c91e17"
+  default     = "ami-0e001c9271cf7f3b9"
 }
 
 variable "instance_type" {
