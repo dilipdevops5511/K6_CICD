@@ -33,13 +33,6 @@
       copy:
         src: data_part1.csv
         dest: /home/ubuntu/combined.csv
-      when: "'part1' in group_names and inventory_hostname in groups['apis']"
-
-    - name: Copy split CSV data to instance (part 2)
-      copy:
-        src: data_part2.csv
-        dest: /home/ubuntu/combined.csv
-      when: "'part2' in group_names and inventory_hostname in groups['frontend']"
 
   
 
