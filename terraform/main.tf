@@ -1,3 +1,5 @@
+// main.tf
+
 provider "aws" {
   region = var.aws_region
 }
@@ -66,4 +68,18 @@ resource "aws_instance" "k6_instance" {
               sudo apt update
               sudo apt install k6 -y
               EOF
+}
+
+// Generate Ansible inventory file
+data "template_file" "ansible_inventory" {
+  template = file("${path.module}/ansible_inventory.tpl")
+
+  vars = {
+    aws_instance = aws_instance.k6_instance[*]
+  }
+}
+
+resource "local_file" "ansible_inventory_file" {
+  content  = data.template_file.ansible_inventory.rendered
+  filename = "${path.module}/ansible_inventory"
 }
