@@ -47,5 +47,5 @@
     - name: Fetch k6 report JSON file
       fetch:
         src: /home/ubuntu/k6_report.json
-        dest: /path/to/local/reports/{{ inventory_hostname }}_k6_report.json
+        dest: /home/ubuntu/k6_reportzzzzz.json
         flat: yes
