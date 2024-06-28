@@ -17,39 +17,11 @@ resource "aws_subnet" "main" {
   map_public_ip_on_launch = true  # Ensure instances launched in this subnet get a public IP
 }
 
-resource "aws_security_group" "instance" {
-  vpc_id = aws_vpc.main.id
-
-  // Ingress rules allow SSH and HTTP traffic from anywhere
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  // Egress rule allows all outbound traffic
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
 resource "aws_instance" "k6_instance" {
   count           = 3
   ami             = var.ami_id
   instance_type   = var.instance_type
   subnet_id       = element(aws_subnet.main.*.id, count.index)
-  security_groups = [aws_security_group.instance.id]
   key_name        = "techkeyjune"
   associate_public_ip_address = true  # Ensures instances get a public IP
 
@@ -70,16 +42,8 @@ resource "aws_instance" "k6_instance" {
               EOF
 }
 
-// Generate Ansible inventory file
-data "template_file" "ansible_inventory" {
-  template = file("${path.module}/ansible_inventory.tpl")
-
-  vars = {
-    aws_instance = aws_instance.k6_instance[*]
-  }
-}
-
-resource "local_file" "ansible_inventory_file" {
-  content  = data.template_file.ansible_inventory.rendered
-  filename = "${path.module}/ansible_inventory"
+// Generate a file containing only the public IP addresses of the instances
+resource "local_file" "instance_ips" {
+  content = join("\n", aws_instance.k6_instance[*].public_ip)
+  filename = "${path.module}/instance_ips.txt"
 }
