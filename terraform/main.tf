@@ -10,7 +10,7 @@ resource "aws_vpc" "main" {
 }
 
 // Create internet gateway
-resource "aws_internet_gateway" "main" {
+resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.main.id
 
   tags = {
@@ -30,7 +30,7 @@ resource "aws_subnet" "public" {
 // Associate internet gateway with the VPC
 resource "aws_vpc_attachment" "main_igw_attachment" {
   vpc_id       = aws_vpc.main.id
-  internet_gateway_id = aws_internet_gateway.main.id
+  internet_gateway_id = aws_internet_gateway.igw.id
 }
 
 // Create instances in the public subnet with SSH access enabled
