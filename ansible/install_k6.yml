@@ -33,14 +33,15 @@
       copy:
         src: data_part1.csv
         dest: /home/ubuntu/combined.csv
-      when: "'part1' in apis"
+      when: "'part1' in apis" and inventory_hostname in groups['apis'] and ansible_host == inventory_hostname
+      # Checks if 'part1' is in 'apis' group and the CSV file exists on the current host
 
     - name: Copy split CSV data to instance (part 2)
       copy:
         src: data_part2.csv
         dest: /home/ubuntu/combined.csv
-      when: "'part2' in frontend"
-
+      when: "'part2' in frontend" and inventory_hostname in groups['frontend'] and ansible_host == inventory_hostname
+      # Checks if 'part2' is in 'frontend' group and the CSV file exists on the current host
 
     - name: Run k6 test and save output to JSON file
       shell: k6 run /home/ubuntu/your-test-script.js --out json=/home/ubuntu/k6_report.json
