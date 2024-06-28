@@ -33,19 +33,15 @@
       copy:
         src: data_part1.csv
         dest: /home/ubuntu/combined.csv
-      when: "'part1' in group_names and ('apis' in group_names or 'frontend' in group_names) and inventory_hostname in groups['apis']"
+      when: "'part1' in group_names and inventory_hostname in groups['apis']"
 
     - name: Copy split CSV data to instance (part 2)
       copy:
         src: data_part2.csv
         dest: /home/ubuntu/combined.csv
-      when: "'part2' in group_names and ('apis' in group_names or 'frontend' in group_names) and inventory_hostname in groups['frontend']"
+      when: "'part2' in group_names and inventory_hostname in groups['frontend']"
 
-    - name: Copy split CSV data to instance (part 3)
-      copy:
-        src: data_part3.csv
-        dest: /home/ubuntu/combined.csv
-      when: "'part3' in group_names and ('apis' in group_names or 'frontend' in group_names)"
+  
 
     - name: Run k6 test and save output to JSON file
       shell: k6 run /home/ubuntu/your-test-script.js --out json=/home/ubuntu/k6_report.json
