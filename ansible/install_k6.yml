@@ -26,7 +26,7 @@
 
     - name: Copy k6 test script to instance
       copy:
-        src: /path/to/your-test-script.js
+        src: script/your-test-script.js
         dest: /home/ubuntu/your-test-script.js  # Adjust user to ubuntu for Ubuntu
 
     - name: Copy split CSV data to instance (part 1)
