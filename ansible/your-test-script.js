@@ -7,7 +7,7 @@ export let options = {
   scenarios: {
     contacts: {
       executor: 'shared-iterations',
-      vus: 10,
+      vus: 1,
       iterations: 5,
       maxDuration: '10s',
     },
