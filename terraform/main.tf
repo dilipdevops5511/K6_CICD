@@ -7,6 +7,10 @@ provider "aws" {
 // Create VPC
 resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
+
+  tags = {
+    Name = "main-vpc"
+  }
 }
 
 // Create internet gateway
@@ -25,12 +29,30 @@ resource "aws_subnet" "public" {
   availability_zone = element(var.availability_zones, 0)
   
   map_public_ip_on_launch = true  // Ensure instances launched in this subnet get a public IP
+
+  tags = {
+    Name = "public-subnet"
+  }
 }
 
 // Associate internet gateway with the VPC
-resource "aws_vpc_attachment" "main_igw_attachment" {
-  vpc_id       = aws_vpc.main.id
-  internet_gateway_id = aws_internet_gateway.igw.id
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw.id  // Use the internet gateway to route traffic outside
+  }
+
+  tags = {
+    Name = "public-route-table"
+  }
+}
+
+// Associate the public route table with the public subnet
+resource "aws_route_table_association" "public_subnet_association" {
+  subnet_id      = aws_subnet.public.id
+  route_table_id = aws_route_table.public.id
 }
 
 // Create instances in the public subnet with SSH access enabled
@@ -82,26 +104,6 @@ resource "aws_security_group" "instance_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-}
-
-// Create a public route table
-resource "aws_route_table" "public" {
-  vpc_id = aws_vpc.main.id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.igw.id  // Use the internet gateway to route traffic outside
-  }
-
-  tags = {
-    Name = "public-route-table"
-  }
-}
-
-// Associate the public route table with the public subnet
-resource "aws_route_table_association" "public_subnet_association" {
-  subnet_id      = aws_subnet.public.id
-  route_table_id = aws_route_table.public.id
 }
 
 // Generate a file containing only the public IP addresses of the instances
