@@ -1,8 +1,8 @@
 import json
 
 # Paths to the fetched k6_report.json files
-file1_path = '/home/ubuntu/3.89.225.78_k6_report.json'
-file2_path = '/home/ubuntu/54.234.217.103_k6_report.json'
+file1_path = '/home/ubuntu/a.json'
+file2_path = '/home/ubuntu/b.json'
 
 # Function to read and parse JSON file
 def read_json_file(file_path):
