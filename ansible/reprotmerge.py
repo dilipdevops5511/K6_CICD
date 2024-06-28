@@ -45,7 +45,7 @@ try:
     merged_data = merge_json_files(json_data1 + json_data2)
 
     # Write merged data to a new JSON file
-    merged_file_path = '/path/to/merged_k6_report.json'
+    merged_file_path = '/home/ubuntu/merged_k6_report.json'
     with open(merged_file_path, 'w') as merged_file:
         json.dump(merged_data, merged_file, indent=4)
 
