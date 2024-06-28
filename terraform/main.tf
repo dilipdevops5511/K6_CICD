@@ -9,6 +9,15 @@ resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
 }
 
+// Create internet gateway
+resource "aws_internet_gateway" "main" {
+  vpc_id = aws_vpc.main.id
+
+  tags = {
+    Name = "main-igw"
+  }
+}
+
 // Create public subnet with public IP assignment
 resource "aws_subnet" "public" {
   vpc_id            = aws_vpc.main.id
@@ -16,6 +25,12 @@ resource "aws_subnet" "public" {
   availability_zone = element(var.availability_zones, 0)
   
   map_public_ip_on_launch = true  // Ensure instances launched in this subnet get a public IP
+}
+
+// Associate internet gateway with the VPC
+resource "aws_vpc_attachment" "main_igw_attachment" {
+  vpc_id       = aws_vpc.main.id
+  internet_gateway_id = aws_internet_gateway.main.id
 }
 
 // Create instances in the public subnet with SSH access enabled
@@ -75,7 +90,7 @@ resource "aws_route_table" "public" {
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.main.id  // Replace with your internet gateway ID if applicable
+    gateway_id = aws_internet_gateway.main.id  // Use the internet gateway to route traffic outside
   }
 
   tags = {
