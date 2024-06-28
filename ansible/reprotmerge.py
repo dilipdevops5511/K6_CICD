@@ -7,17 +7,33 @@ file2_path = '/home/ubuntu/54.234.217.103_k6_report.json'
 # Function to read and parse JSON file
 def read_json_file(file_path):
     with open(file_path, 'r') as f:
-        data = json.load(f)
-    return data
+        # Read entire file content
+        content = f.read()
+        
+        # Split content by lines (assuming each line contains a JSON object)
+        lines = content.splitlines()
+        
+        # Initialize an empty list to store parsed JSON objects
+        json_data = []
+        
+        # Parse each line as JSON and append to json_data list
+        for line in lines:
+            if line.strip():  # Skip empty lines
+                json_data.append(json.loads(line))
+        
+        return json_data
 
 # Function to merge two JSON files
-def merge_json_files(file1, file2):
-    # Assuming 'data' -> 'result' structure
+def merge_json_files(files_data):
     merged_data = {
         'data': {
-            'result': file1['data']['result'] + file2['data']['result']
+            'result': []
         }
     }
+    
+    for file_data in files_data:
+        merged_data['data']['result'].extend(file_data['data']['result'])
+    
     return merged_data
 
 try:
@@ -26,7 +42,7 @@ try:
     json_data2 = read_json_file(file2_path)
 
     # Merge JSON files
-    merged_data = merge_json_files(json_data1, json_data2)
+    merged_data = merge_json_files(json_data1 + json_data2)
 
     # Write merged data to a new JSON file
     merged_file_path = '/path/to/merged_k6_report.json'
