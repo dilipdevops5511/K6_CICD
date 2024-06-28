@@ -52,7 +52,7 @@ resource "aws_instance" "k6_instance" {
 resource "aws_security_group" "instance_sg" {
   vpc_id = aws_vpc.main.id
 
-  // Ingress rules allow SSH traffic from anywhere
+  // Ingress rule allowing SSH traffic from anywhere
   ingress {
     from_port   = 22
     to_port     = 22
@@ -71,6 +71,6 @@ resource "aws_security_group" "instance_sg" {
 
 // Generate a file containing only the public IP addresses of the instances
 resource "local_file" "instance_ips" {
-  content = join("\n", aws_instance.k6_instance[*].public_ip)
+  content  = join("\n", aws_instance.k6_instance[*].public_ip)
   filename = "${path.module}/instance_ips.txt"
 }
