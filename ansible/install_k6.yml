@@ -1,6 +1,6 @@
 ---
 - name: Install k6 and run tests
-  hosts: k6_instances
+  hosts: servers
   become: yes
   tasks:
     - name: Update and install dependencies
