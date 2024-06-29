@@ -61,7 +61,7 @@ resource "aws_instance" "k6_instance" {
   ami             = var.ami_id
   instance_type   = var.instance_type
   subnet_id       = aws_subnet.public.id  // Use the public subnet for instances
-  key_name        = "techkeyjune"
+  key_name        = "HopeKey"
   associate_public_ip_address = true  // Ensures instances get a public IP
 
   // Security group allowing SSH access from anywhere
