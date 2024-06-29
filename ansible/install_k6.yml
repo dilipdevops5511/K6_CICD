@@ -2,6 +2,12 @@
 - name: Install k6 and run tests
   hosts: servers
   become: yes
+  vars:
+    influxdb_host: "localhost"
+    influxdb_port: 8086
+    influxdb_database: "k6"
+    k6_script: "/home/ubuntu/your-test-script.js"
+
   tasks:
     - name: Update and install dependencies
       apt:
@@ -10,6 +16,7 @@
       loop:
         - docker.io
         - curl
+        - gnupg
 
     - name: Start Docker service
       service:
@@ -27,25 +34,31 @@
     - name: Copy k6 test script to instance
       copy:
         src: your-test-script.js
-        dest: /home/ubuntu/your-test-script.js  # Adjust user to ubuntu for Ubuntu
+        dest: /home/ubuntu/your-test-script.js
 
     - name: Copy split CSV data to instance (part 1)
       copy:
         src: data_part1.csv
         dest: /home/ubuntu/combined.csv
 
-  
+    - name: Copy split CSV data to instance (part 2)
+      copy:
+        src: data_part2.csv
+        dest: /home/ubuntu/combined.csv
 
-    - name: Run k6 test and save output to JSON file
-      shell: k6 run /home/ubuntu/your-test-script.js --out json=/home/ubuntu/k6_report.json
+    - name: Run k6 test on first segment and save output to JSON file
+      shell: |
+        k6 run --execution-segment "0:1/2" --execution-segment-sequence "0,1/2,1" --out influxdb=http://{{ influxdb_host }}:{{ influxdb_port }}/{{ influxdb_database }} /home/ubuntu/your-test-script.js --out json=/home/ubuntu/k6_report.json
       register: k6_output
+      when: inventory_hostname == 'machine1'
+
+    - name: Run k6 test on second segment and save output to JSON file
+      shell: |
+        k6 run --execution-segment "1/2:1" --execution-segment-sequence "0,1/2,1" --out influxdb=http://{{ influxdb_host }}:{{ influxdb_port }}/{{ influxdb_database }} /home/ubuntu/your-test-script.js --out json=/home/ubuntu/k6_report.json
+      register: k6_output
+      when: inventory_hostname == 'machine2'
 
     - name: Display k6 output
       debug:
         var: k6_output.stdout
 
-    - name: Fetch k6 report JSON file
-      fetch:
-        src: /home/ubuntu/k6_report.json
-        dest: /home/ubuntu/{{ inventory_hostname }}_k6_report.json
-        flat: yes

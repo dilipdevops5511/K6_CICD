@@ -1,0 +1,6 @@
+[servers]
+machine1 ansible_host=
+machine2 ansible_host=
+
+[grafana_influxdb]
+grafana_server ansible_host=
