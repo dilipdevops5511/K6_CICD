@@ -1,6 +1,6 @@
 ---
 - name: Install k6 and run tests
-  hosts: servers
+  hosts: machines
   become: yes
   vars:
     influxdb_host: "localhost"
