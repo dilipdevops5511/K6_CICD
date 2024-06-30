@@ -2,51 +2,34 @@
 - name: Install k6 and run tests
   hosts: machines
   become: yes
-  vars:
-    influxdb_host: "localhost"
-    influxdb_port: 8086
-    influxdb_database: "k6"
-    k6_script: "/home/ubuntu/your-test-script.js"
 
   tasks:
     - name: Update apt packages cache
       apt:
         update_cache: yes
 
-    - name: Install prerequisites for Docker
+    - name: Install prerequisites
       apt:
         name: "{{ item }}"
         state: present
-      with_items:
-        - apt-transport-https
-        - ca-certificates
+      loop:
         - curl
         - gnupg
-        - software-properties-common
-
-    - name: Add Docker GPG key
-      apt_key:
-        url: https://download.docker.com/linux/ubuntu/gpg
-        state: present
-
-    - name: Add Docker repository
-      apt_repository:
-        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
-        state: present
 
     - name: Download k6 GPG key
-      get_url:
+      ansible.builtin.get_url:
         url: https://dl.k6.io/key
         dest: /tmp/k6.key
 
     - name: Add k6 GPG key to apt keyring
-      command: apt-key add /tmp/k6.key
+      ansible.builtin.command: apt-key add /tmp/k6.key
       become: yes
 
     - name: Add k6 repository
       apt_repository:
         repo: deb https://dl.k6.io/deb stable main
         state: present
+        filename: k6
 
     - name: Install k6
       apt:
@@ -54,28 +37,28 @@
         state: present
 
     - name: Copy k6 test script to instance
-      copy:
+      ansible.builtin.copy:
         src: your-test-script.js
         dest: /home/ubuntu/your-test-script.js
 
     - name: Copy split CSV data to instance (part 1)
-      copy:
+      ansible.builtin.copy:
         src: data_part1.csv
         dest: /home/ubuntu/combined.csv
 
     - name: Copy split CSV data to instance (part 2)
-      copy:
+      ansible.builtin.copy:
         src: data_part2.csv
         dest: /home/ubuntu/combined.csv
 
     - name: Run k6 test on first segment and save output to JSON file
-      shell: |
-        k6 run --execution-segment "0:1/2" --execution-segment-sequence "0,1/2,1" --out influxdb=http://{{ influxdb_host }}:{{ influxdb_port }}/{{ influxdb_database }} /home/ubuntu/your-test-script.js --out json=/home/ubuntu/k6_report.json
+      ansible.builtin.shell:
+        cmd: k6 run --execution-segment "0:1/2" --execution-segment-sequence "0,1/2,1" /home/ubuntu/your-test-script.js --out json=/home/ubuntu/k6_report.json
       register: k6_output
       when: inventory_hostname == 'machine1'
 
     - name: Run k6 test on second segment and save output to JSON file
-      shell: |
-        k6 run --execution-segment "1/2:1" --execution-segment-sequence "0,1/2,1" --out influxdb=http://{{ influxdb_host }}:{{ influxdb_port }}/{{ influxdb_database }} /home/ubuntu/your-test-script.js --out json=/home/ubuntu/k6_report.json
+      ansible.builtin.shell:
+        cmd: k6 run --execution-segment "1/2:1" --execution-segment-sequence "0,1/2,1" /home/ubuntu/your-test-script.js --out json=/home/ubuntu/k6_report.json
       register: k6_output
       when: inventory_hostname == 'machine2'
