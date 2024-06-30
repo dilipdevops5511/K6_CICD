@@ -16,15 +16,6 @@
         - curl
         - gnupg
 
-    - name: Download k6 GPG key
-      ansible.builtin.get_url:
-        url: https://dl.k6.io/key
-        dest: /tmp/k6.key
-
-    - name: Add k6 GPG key to apt keyring
-      ansible.builtin.command: apt-key add /tmp/k6.key
-      become: yes
-
     - name: Add k6 repository
       apt_repository:
         repo: deb https://dl.k6.io/deb stable main
