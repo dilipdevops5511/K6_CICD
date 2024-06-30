@@ -31,20 +31,24 @@
         src: data_part2.csv
         dest: /home/ubuntu/data_part2.csv
 
-    - name: Run k6 test on first segment and save output to JSON file (machine1)
+    - name: Run k6 test on first segment and send output to InfluxDB (machine1)
       ansible.builtin.shell:
-        cmd: k6 run --execution-segment "0:1/2" --execution-segment-sequence "0,1/2,1" /home/ubuntu/your-test-script.js --out json=/home/ubuntu/k6_report.json
+        cmd: k6 run --execution-segment "0:1/2" --execution-segment-sequence "0,1/2,1" /home/ubuntu/your-test-script.js --out influxdb=http://54.165.250.213:8086/
       async: 1800  # Run the task asynchronously with a timeout of 30 minutes
       poll: 0      # Don't wait for the task to complete
       register: k6_output_1
+      environment:
+        K6_INFLUXDB_OUTPUT: "http://54.165.250.213:8086/"
       when: inventory_hostname == 'machine1'
 
-    - name: Run k6 test on second segment and save output to JSON file (machine2)
+    - name: Run k6 test on second segment and send output to InfluxDB (machine2)
       ansible.builtin.shell:
-        cmd: k6 run --execution-segment "1/2:1" --execution-segment-sequence "0,1/2,1" /home/ubuntu/your-test-script.js --out json=/home/ubuntu/k6_report.json
+        cmd: k6 run --execution-segment "1/2:1" --execution-segment-sequence "0,1/2,1" /home/ubuntu/your-test-script.js --out influxdb=http://54.165.250.213:8086/
       async: 1800  # Run the task asynchronously with a timeout of 30 minutes
       poll: 0      # Don't wait for the task to complete
       register: k6_output_2
+      environment:
+        K6_INFLUXDB_OUTPUT: "http://54.165.250.213:8086/"
       when: inventory_hostname == 'machine2'
 
     - name: Wait for k6 test to finish on machine1
@@ -65,13 +69,6 @@
       delay: 30    # Wait for 30 seconds between retries
       when: inventory_hostname == 'machine2'
 
-    - name: Send k6 results to InfluxDB
-      ansible.builtin.shell:
-        cmd: k6 run /home/ubuntu/your-test-script.js --out influxdb=http://54.165.250.213:8086/
-      register: k6_output
-      environment:
-        K6_INFLUXDB_OUTPUT: "http://54.165.250.213:8086/"  # Set the InfluxDB URL
-
     - debug:
         msg: "k6 test results sent to InfluxDB"
-      when: k6_output.rc == 0  # Display debug message if the task was successful
+      when: job_result_1.finished and job_result_2.finished
