@@ -34,21 +34,14 @@
         repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
         state: present
 
-    - name: Install Docker
-      apt:
-        name: docker-ce
-        state: present
-
-    - name: Start Docker service
-      service:
-        name: docker
-        state: started
-        enabled: yes
-
-    - name: Add k6 GPG key
-      apt_key:
+    - name: Download k6 GPG key
+      get_url:
         url: https://dl.k6.io/key
-        state: present
+        dest: /tmp/k6.key
+
+    - name: Add k6 GPG key to keyring
+      command: apt-key add /tmp/k6.key
+      become: yes
 
     - name: Add k6 repository
       apt_repository:
