@@ -34,13 +34,35 @@
     - name: Run k6 test on first segment and save output to JSON file (machine1)
       ansible.builtin.shell:
         cmd: k6 run --execution-segment "0:1/2" --execution-segment-sequence "0,1/2,1" /home/ubuntu/your-test-script.js --out json=/home/ubuntu/k6_report.json
-      register: k6_output
+      async: 1800  # Run the task asynchronously with a timeout of 30 minutes
+      poll: 0      # Don't wait for the task to complete
+      register: k6_output_1
       when: inventory_hostname == 'machine1'
 
     - name: Run k6 test on second segment and save output to JSON file (machine2)
       ansible.builtin.shell:
         cmd: k6 run --execution-segment "1/2:1" --execution-segment-sequence "0,1/2,1" /home/ubuntu/your-test-script.js --out json=/home/ubuntu/k6_report.json
-      register: k6_output
+      async: 1800  # Run the task asynchronously with a timeout of 30 minutes
+      poll: 0      # Don't wait for the task to complete
+      register: k6_output_2
+      when: inventory_hostname == 'machine2'
+
+    - name: Wait for k6 test to finish on machine1
+      async_status:
+        jid: "{{ k6_output_1.ansible_job_id }}"
+      register: job_result_1
+      until: job_result_1.finished
+      retries: 60  # Adjust the number of retries based on your needs
+      delay: 30    # Wait for 30 seconds between retries
+      when: inventory_hostname == 'machine1'
+
+    - name: Wait for k6 test to finish on machine2
+      async_status:
+        jid: "{{ k6_output_2.ansible_job_id }}"
+      register: job_result_2
+      until: job_result_2.finished
+      retries: 60  # Adjust the number of retries based on your needs
+      delay: 30    # Wait for 30 seconds between retries
       when: inventory_hostname == 'machine2'
 
     - name: Send k6 results to InfluxDB
