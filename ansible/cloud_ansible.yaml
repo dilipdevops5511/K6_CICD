@@ -1,0 +1,36 @@
+---
+- hosts: k6_hosts
+  become: true
+  tasks:
+    - name: Authenticate k6 with cloud
+      shell: k6 login cloud --token 2bf3db1dd7839447e2554249e91f11c186b5185ecc9a5310f9f24a2b16131985
+
+    - name: Install k6
+      apt:
+        name: k6
+        state: present  # Adjust for your package manager if not using apt
+
+    - name: Copy local file to remote hosts
+      copy:
+        src: cloud.js  # Replace with the path to your local cloud.js file
+        dest: /home/ubuntu/cloud.js  # Replace with the path where you want to copy the file on remote hosts
+        mode: 0644  # Adjust permissions as needed
+
+
+    - name: Copy split CSV data to instance (part 1)
+      ansible.builtin.copy:
+        src: data_part1.csv
+        dest: /home/ubuntu/data_part1.csv
+
+    - name: Copy split CSV data to instance (part 2)
+      ansible.builtin.copy:
+        src: data_part2.csv
+        dest: /home/ubuntu/data_part2.csv
+
+    - name: Run load test using k6 cloud on machine1
+      shell: k6 cloud /home/ubuntu/cloud.js
+      delegate_to: machine1
+
+    - name: Run load test using k6 cloud on machine2
+      shell: k6 cloud /home/ubuntu/cloud.js
+      delegate_to: machine2
