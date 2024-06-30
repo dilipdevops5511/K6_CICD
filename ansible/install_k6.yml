@@ -45,11 +45,12 @@
         state: started
         enabled: yes
 
-    - name: Add k6 repository and install k6
+    - name: Add k6 GPG key
       apt_key:
         url: https://dl.k6.io/key
         state: present
 
+    - name: Add k6 repository
       apt_repository:
         repo: deb https://dl.k6.io/deb stable main
         state: present
