@@ -58,7 +58,3 @@
       register: k6_output
       when: inventory_hostname == 'machine2'
 
-    - name: Display k6 output
-      debug:
-        var: k6_output.stdout
-
