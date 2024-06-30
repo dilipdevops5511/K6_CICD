@@ -9,14 +9,35 @@
     k6_script: "/home/ubuntu/your-test-script.js"
 
   tasks:
-    - name: Update and install dependencies
+    - name: Update apt packages cache
+      apt:
+        update_cache: yes
+
+    - name: Install prerequisites for Docker
       apt:
         name: "{{ item }}"
         state: present
-      loop:
-        - docker.io  # Adjust this for your distribution as needed
+      with_items:
+        - apt-transport-https
+        - ca-certificates
         - curl
         - gnupg
+        - software-properties-common
+
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
+        state: present
+
+    - name: Install Docker
+      apt:
+        name: docker-ce
+        state: present
 
     - name: Start Docker service
       service:
@@ -25,11 +46,18 @@
         enabled: yes
 
     - name: Add k6 repository and install k6
-      shell: |
-        curl -s https://dl.k6.io/key.gpg | sudo apt-key add -
-        echo "deb https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
-        sudo apt update
-        sudo apt install k6 -y
+      apt_key:
+        url: https://dl.k6.io/key
+        state: present
+
+      apt_repository:
+        repo: deb https://dl.k6.io/deb stable main
+        state: present
+
+    - name: Install k6
+      apt:
+        name: k6
+        state: present
 
     - name: Copy k6 test script to instance
       copy:
