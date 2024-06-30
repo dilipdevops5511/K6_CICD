@@ -31,9 +31,9 @@
         src: data_part2.csv
         dest: /home/ubuntu/data_part2.csv
 
-    - name: Run k6 test on first segment and send output to InfluxDB (machine1)
+    - name: Run k6 test and send output to InfluxDB (machine1)
       ansible.builtin.shell:
-        cmd: k6 run --execution-segment "0:1/2" --execution-segment-sequence "0,1/2,1" /home/ubuntu/your-test-script.js --out influxdb=http://54.165.250.213:8086/
+        cmd: k6 run /home/ubuntu/your-test-script.js --out influxdb=http://54.165.250.213:8086/
       async: 1800  # Run the task asynchronously with a timeout of 30 minutes
       poll: 0      # Don't wait for the task to complete
       register: k6_output_1
@@ -41,9 +41,9 @@
         K6_INFLUXDB_OUTPUT: "http://54.165.250.213:8086/"
       when: inventory_hostname == 'machine1'
 
-    - name: Run k6 test on second segment and send output to InfluxDB (machine2)
+    - name: Run k6 test and send output to InfluxDB (machine2)
       ansible.builtin.shell:
-        cmd: k6 run --execution-segment "1/2:1" --execution-segment-sequence "0,1/2,1" /home/ubuntu/your-test-script.js --out influxdb=http://54.165.250.213:8086/
+        cmd: k6 run /home/ubuntu/your-test-script.js --out influxdb=http://54.165.250.213:8086/
       async: 1800  # Run the task asynchronously with a timeout of 30 minutes
       poll: 0      # Don't wait for the task to complete
       register: k6_output_2
