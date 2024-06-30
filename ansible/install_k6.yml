@@ -16,11 +16,6 @@
         - curl
         - gnupg
 
-    - name: Install k6
-      apt:
-        name: k6
-        state: present
-
     - name: Copy k6 test script to instance
       ansible.builtin.copy:
         src: path/to/your-test-script.js
