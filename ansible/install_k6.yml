@@ -47,3 +47,14 @@
         cmd: k6 run --execution-segment "1/2:1" --execution-segment-sequence "0,1/2,1" /home/ubuntu/your-test-script.js --out json=/home/ubuntu/k6_report.json
       register: k6_output
       when: inventory_hostname == 'machine2'
+
+    - name: Send k6 results to InfluxDB
+      ansible.builtin.shell:
+        cmd: k6 run /home/ubuntu/your-test-script.js --out influxdb=http://54.165.250.213:8086/
+      register: k6_output
+      environment:
+        K6_INFLUXDB_OUTPUT: "http://54.165.250.213:8086/"  # Set the InfluxDB URL
+
+    - debug:
+        msg: "k6 test results sent to InfluxDB"
+      when: k6_output.rc == 0  # Display debug message if the task was successful
