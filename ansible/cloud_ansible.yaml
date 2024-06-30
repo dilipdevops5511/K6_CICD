@@ -1,5 +1,5 @@
 ---
-- hosts: k6_hosts
+- hosts: machines
   become: true
   tasks:
     - name: Authenticate k6 with cloud
