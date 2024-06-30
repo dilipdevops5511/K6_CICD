@@ -18,17 +18,17 @@
 
     - name: Copy k6 test script to instance
       ansible.builtin.copy:
-        src: path/to/your-test-script.js
+        src: your-test-script.js
         dest: /home/ubuntu/your-test-script.js
 
     - name: Copy split CSV data to instance (part 1)
       ansible.builtin.copy:
-        src: path/to/data_part1.csv
+        src: data_part1.csv
         dest: /home/ubuntu/data_part1.csv
 
     - name: Copy split CSV data to instance (part 2)
       ansible.builtin.copy:
-        src: path/to/data_part2.csv
+        src: data_part2.csv
         dest: /home/ubuntu/data_part2.csv
 
     - name: Run k6 test on first segment and save output to JSON file (machine1)
