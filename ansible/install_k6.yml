@@ -1,7 +1,7 @@
 ---
 - name: Install k6 and run tests
-  hosts: machines
-  become: yes
+  hosts: machines  # Replace with your target host group or hostname
+  become: yes  # Run tasks with root privileges
 
   tasks:
     - name: Update apt packages cache
@@ -16,12 +16,6 @@
         - curl
         - gnupg
 
-    - name: Add k6 repository
-      apt_repository:
-        repo: deb https://dl.k6.io/deb stable main
-        state: present
-        filename: k6
-
     - name: Install k6
       apt:
         name: k6
@@ -29,27 +23,21 @@
 
     - name: Copy k6 test script to instance
       ansible.builtin.copy:
-        src: your-test-script.js
-        dest: /home/ubuntu/your-test-script.js
+        src: path/to/your-test-script.js  # Replace with your k6 test script path
+        dest: /home/ubuntu/your-test-script.js  # Adjust destination path as needed
+        mode: 0755  # Ensure script has executable permissions
 
     - name: Copy split CSV data to instance (part 1)
       ansible.builtin.copy:
-        src: data_part1.csv
-        dest: /home/ubuntu/combined.csv
+        src: path/to/data_part1.csv  # Replace with your data part 1 CSV path
+        dest: /home/ubuntu/combined.csv  # Adjust destination path as needed
 
     - name: Copy split CSV data to instance (part 2)
       ansible.builtin.copy:
-        src: data_part2.csv
-        dest: /home/ubuntu/combined.csv
+        src: path/to/data_part2.csv  # Replace with your data part 2 CSV path
+        dest: /home/ubuntu/combined.csv  # Adjust destination path as needed
 
-    - name: Run k6 test on first segment and save output to JSON file
+    - name: Run k6 test and save output to JSON file
       ansible.builtin.shell:
-        cmd: k6 run --execution-segment "0:1/2" --execution-segment-sequence "0,1/2,1" /home/ubuntu/your-test-script.js --out json=/home/ubuntu/k6_report.json
+        cmd: k6 run /home/ubuntu/your-test-script.js --out influxdb=http://54.165.250.213:8086/
       register: k6_output
-      when: inventory_hostname == 'machine1'
-
-    - name: Run k6 test on second segment and save output to JSON file
-      ansible.builtin.shell:
-        cmd: k6 run --execution-segment "1/2:1" --execution-segment-sequence "0,1/2,1" /home/ubuntu/your-test-script.js --out json=/home/ubuntu/k6_report.json
-      register: k6_output
-      when: inventory_hostname == 'machine2'
