@@ -14,7 +14,7 @@
         name: "{{ item }}"
         state: present
       loop:
-        - docker.io
+        - docker.io  # Adjust this for your distribution as needed
         - curl
         - gnupg
 
@@ -57,4 +57,3 @@
         k6 run --execution-segment "1/2:1" --execution-segment-sequence "0,1/2,1" --out influxdb=http://{{ influxdb_host }}:{{ influxdb_port }}/{{ influxdb_database }} /home/ubuntu/your-test-script.js --out json=/home/ubuntu/k6_report.json
       register: k6_output
       when: inventory_hostname == 'machine2'
-
