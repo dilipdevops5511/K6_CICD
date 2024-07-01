@@ -19,7 +19,7 @@
     - name: Copy k6 test script to instance
       ansible.builtin.copy:
         src: your-test-script.js
-        dest: /home/ubuntu/your-test-script.js
+        dest: /home/ubuntu/test.js
 
     - name: Copy split CSV data to instance (part 1)
       ansible.builtin.copy:
@@ -33,22 +33,22 @@
 
     - name: Run k6 test and send output to InfluxDB (machine1)
       ansible.builtin.shell:
-        cmd: k6 run /home/ubuntu/your-test-script.js --out influxdb=http://54.165.250.213:8086/
+        cmd: k6 run /home/ubuntu/test.js --out influxdb=http://174.129.72.227:8086/
       async: 1800  # Run the task asynchronously with a timeout of 30 minutes
       poll: 0      # Don't wait for the task to complete
       register: k6_output_1
       environment:
-        K6_INFLUXDB_OUTPUT: "http://54.165.250.213:8086/"
+        K6_INFLUXDB_OUTPUT: "http://174.129.72.227:8086/"
       when: inventory_hostname == 'machine1'
 
     - name: Run k6 test and send output to InfluxDB (machine2)
       ansible.builtin.shell:
-        cmd: k6 run /home/ubuntu/your-test-script.js --out influxdb=http://54.165.250.213:8086/
+        cmd: k6 run /home/ubuntu/test.js --out influxdb=http://174.129.72.227:8086/
       async: 1800  # Run the task asynchronously with a timeout of 30 minutes
       poll: 0      # Don't wait for the task to complete
       register: k6_output_2
       environment:
-        K6_INFLUXDB_OUTPUT: "http://54.165.250.213:8086/"
+        K6_INFLUXDB_OUTPUT: "http://174.129.72.227:8086/"
       when: inventory_hostname == 'machine2'
 
     - name: Wait for k6 test to finish on machine1
